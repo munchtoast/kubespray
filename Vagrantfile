@@ -4,6 +4,7 @@
 # For help on using kubespray with vagrant, check out docs/developers/vagrant.md
 
 require 'fileutils'
+require 'ipaddr'
 
 Vagrant.require_version ">= 2.0.0"
 
@@ -54,7 +55,7 @@ $vm_memory ||= 2048
 $vm_cpus ||= 2
 $shared_folders ||= {}
 $forwarded_ports ||= {}
-$subnet ||= "172.18.8"
+$subnet ||= "192.168.10"
 $subnet_ipv6 ||= "fd3c:b398:0698:0756"
 $os ||= "ubuntu2004"
 $network_plugin ||= "flannel"
@@ -97,7 +98,30 @@ $vagrant_dir ||= File.join(File.dirname(__FILE__), ".vagrant")
 $playbook ||= "cluster.yml"
 $extra_vars ||= {}
 
+# Extend playbook and vars
+$extend_ansible ||= {
+  "vagrant/main.yml" => "vagrant/default.yml"
+}
+
 host_vars = {}
+
+# throw error if ip subnet is in use
+ip_test = IPAddr.new("#{$subnet}.0")
+
+internal_ips = `ip addr`.scan(/inet (\d{1,3}(?:\.\d{1,3}){3}\/\d{1,2})/).flatten
+
+network_ips = internal_ips.map do |ip_cidr|
+  prefix = ip_cidr.split('/').last.to_i
+  ip = IPAddr.new(ip_cidr)
+  net = ip.mask(prefix)
+  IPAddr.new("#{net}/#{prefix}")
+end
+
+if network_ips.any? { |net_ip| net_ip.include?(ip_test) && ip_test != net_ip }
+  puts "Invalid subnet provided, subnet is already in use: #{$subnet}.0"
+  puts "Subnets in use: " + network_ips.inspect
+  exit 1
+end
 
 # throw error if os is not supported
 if ! SUPPORTED_OS.key?($os)
@@ -290,7 +314,7 @@ Vagrant.configure("2") do |config|
       # Only execute the Ansible provisioner once, when all the machines are up and ready.
       # And limit the action to gathering facts, the full playbook is going to be ran by testcases_run.sh
       if i == $num_instances
-        node.vm.provision "ansible" do |ansible|
+        node.vm.provision "cluster", type: "ansible" do |ansible|
           ansible.playbook = $playbook
           ansible.compatibility_mode = "2.0"
           ansible.verbose = $ansible_verbosity
@@ -312,6 +336,18 @@ Vagrant.configure("2") do |config|
             "kube_node" => ["#{$instance_name_prefix}-[#{$first_node}:#{$kube_node_instances + $first_node - 1}]"],
             "k8s_cluster:children" => ["kube_control_plane", "kube_node"],
           }
+        end
+
+        # Extend ansible playbooks
+        $extend_ansible.each do |extend_playbook,extend_vars|
+          node.vm.provision "extend", type: "ansible" do |ansible|
+            ansible.playbook = extend_playbook
+            ansible.compatibility_mode = "2.0"
+            ansible.become = true
+            ansible.limit = "all,localhost"
+            ansible.host_key_checking = false
+            ansible.extra_vars = extend_vars
+          end
         end
       end
 

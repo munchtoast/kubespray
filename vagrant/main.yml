@@ -1,0 +1,24 @@
+---
+- hosts: all
+  gather_facts: true
+  vars:
+    playbook_tasks_run_order: [] # These will be tasks ran at the end before post_tasks
+  tasks:
+    - name: "Merge input and playbook tasks"
+      ansible.builtin.set_fact:
+        playbook_merged_tasks_run_order: "{{ input_tasks_run_order | default([]) + playbook_tasks_run_order | default([]) | list }}"
+
+    - name: "Fail if list is empty"
+      when: not playbook_merged_tasks_run_order | length > 0
+      ansible.builtin.fail:
+        msg: "input_tasks_run_order must be defined!"
+
+    - name: "Execute subtasks"
+      ansible.builtin.include_tasks: utils/execute_task.yml
+      vars:
+        load_task: "subtask/{{ task.name }}"
+        load_vars: "{{ task.vars | map('regex_replace', '^(.*)$', 'subtask_vars/\\1') | list }}"
+      loop_control:
+        loop_var: task
+      loop: "{{ playbook_merged_tasks_run_order }}"
+...
