@@ -1,0 +1,5 @@
+---
+- name: debug
+  ansible.builtin.debug:
+    msg: "{{ extends.test_hello_world }}"
+...

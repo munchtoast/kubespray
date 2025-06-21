@@ -1,0 +1,9 @@
+---
+input_tasks_run_order:
+  - name: EXAMPLE_test.yml
+    vars:
+      - EXAMPLE_test.vars.yml
+  - name: EXAMPLE_echo.yml
+    vars:
+      - EXAMPLE_echo.vars.yml
+...

@@ -1,0 +1,5 @@
+---
+- name: ack
+  ansible.builtin.shell:
+    cmd: "echo {{ extends.echo_ack }}"
+...

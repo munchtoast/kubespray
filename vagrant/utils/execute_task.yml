@@ -1,0 +1,15 @@
+---
+- name: "Load variable file"
+  when: load_vars | length > 0
+  ansible.builtin.include_vars:
+    file: "{{ var_file }}"
+    name: injected_vars
+  loop_control:
+    loop_var: var_file
+  loop: "{{ load_vars }}"
+
+- name: "Execute {{ load_task }} task"
+  ansible.builtin.include_tasks: "{{ load_task }}"
+  vars:
+    extends: "{{ injected_vars }}"
+...
