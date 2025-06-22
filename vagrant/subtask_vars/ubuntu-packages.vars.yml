@@ -1,0 +1,16 @@
+---
+# Normal package module is enough
+packages:
+  - open-iscsi
+  - nfs-common
+  - cryptsetup
+  - dmsetup
+  - apt-transport-https
+  - gpg
+# Install by manual signing keys and adding repos
+other_packages:
+  - name: helm
+    signing_url: https://baltocdn.com/helm/signing.asc
+    signing_dest: /usr/share/keyrings/helm.gpg
+    repo_content: deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main
+...

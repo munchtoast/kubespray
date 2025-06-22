@@ -1,0 +1,7 @@
+---
+charts:
+  - name: longhorn
+    namespace: longhorn-system
+    url: https://charts.longhorn.io
+    ref: longhorn/longhorn
+...
