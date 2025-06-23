@@ -347,6 +347,20 @@ Vagrant.configure("2") do |config|
             ansible.limit = "all,localhost"
             ansible.host_key_checking = false
             ansible.extra_vars = extend_vars
+            ansible.raw_arguments = ["--forks=#{$num_instances}",
+                                     "--flush-cache",
+                                     "-e ansible_become_pass=vagrant"] +
+                                     $inventories.map {|inv| ["-i", inv]}.flatten
+            ansible.host_vars = host_vars
+            if $ansible_tags != ""
+              ansible.tags = [$ansible_tags]
+            end
+            ansible.groups = {
+              "etcd" => ["#{$instance_name_prefix}-[#{$first_etcd}:#{$etcd_instances + $first_etcd - 1}]"],
+              "kube_control_plane" => ["#{$instance_name_prefix}-[#{$first_control_plane}:#{$control_plane_instances + $first_control_plane - 1}]"],
+              "kube_node" => ["#{$instance_name_prefix}-[#{$first_node}:#{$kube_node_instances + $first_node - 1}]"],
+              "k8s_cluster:children" => ["kube_control_plane", "kube_node"],
+            }
           end
         end
       end
