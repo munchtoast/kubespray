@@ -7,6 +7,9 @@ input_tasks_run_order:
   - name: install-other-packages-apt.yml
     vars:
       - ubuntu-packages.vars.yml
+  - name: install-pip-packages.yml
+    vars:
+      - pip-packages.vars.yml
   - name: install-helm-charts.yml
     vars:
       - helm-charts.vars.yml
