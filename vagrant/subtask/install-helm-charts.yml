@@ -15,6 +15,7 @@
     namespace: "{{ chart.namespace }}"
     create_namespace: true
     chart_ref: "{{ chart.ref }}"
+    values_files: "{{ chart.values_files }}"
   loop_control:
     loop_var: chart
   loop: "{{ extends.charts }}"
