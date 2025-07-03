@@ -1,0 +1,38 @@
+---
+# TODO: Some bug from apt needs investigating with some packages (i.e. helm)
+# - name: Add signing key
+  # become: true
+  # ansible.builtin.get_url:
+    # url: "{{ package.signing_url }}"
+    # dest: "{{ package.signing_dest }}"
+    # #checksum: TODO
+  # loop_control:
+    # loop_var: package
+  # loop: "{{ extends.other_packages }}"
+
+- name: Add signing key
+  become: true
+  ansible.builtin.shell: |
+    curl {{ package.signing_url }} | gpg --dearmor | tee {{ package.signing_dest }};
+  loop_control:
+    loop_var: package
+  loop: "{{ extends.other_packages }}"
+
+- name: Add apt repository
+  become: true
+  ansible.builtin.apt_repository:
+    repo: "{{ package.repo_content }}"
+    state: present
+  loop_control:
+    loop_var: package
+  loop: "{{ extends.other_packages }}"
+
+- name: Install apt package
+  become: true
+  ansible.builtin.package:
+    state: present
+    name: "{{ package.name }}"
+  loop_control:
+    loop_var: package
+  loop: "{{ extends.other_packages }}"
+...
