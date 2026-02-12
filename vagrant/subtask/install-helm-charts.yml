@@ -1,0 +1,22 @@
+---
+- name: "Install helm chart repositories"
+  kubernetes.core.helm_repository:
+    name: "{{ chart.name }}"
+    repo_url: "{{ chart.url }}"
+  loop_control:
+    loop_var: chart
+  loop: "{{ extends.charts }}"
+
+- name: "Install helm charts"
+  when: inventory_hostname in groups['kube_control_plane']
+  run_once: true # This can cause a bug! If k8s-1 is not control plane, it will fail.
+  kubernetes.core.helm:
+    name: "{{ chart.name }}"
+    namespace: "{{ chart.namespace }}"
+    create_namespace: true
+    chart_ref: "{{ chart.ref }}"
+    values_files: "{{ chart.values_files }}"
+  loop_control:
+    loop_var: chart
+  loop: "{{ extends.charts }}"
+...
