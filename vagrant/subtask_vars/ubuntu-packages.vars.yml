@@ -8,10 +8,11 @@ packages:
   - apt-transport-https
   - gpg
   - python3-pip
+  - curl
 # Install by manual signing keys and adding repos
 other_packages:
   - name: helm
-    signing_url: https://baltocdn.com/helm/signing.asc
+    signing_url: https://packages.buildkite.com/helm-linux/helm-debian/gpgkey
     signing_dest: /usr/share/keyrings/helm.gpg
-    repo_content: deb [arch=amd64 signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main
+    repo_content: deb [signed-by=/usr/share/keyrings/helm.gpg] https://packages.buildkite.com/helm-linux/helm-debian/any/ any main
 ...

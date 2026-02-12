@@ -13,7 +13,7 @@
 - name: Add signing key
   become: true
   ansible.builtin.shell: |
-    curl {{ package.signing_url }} | gpg --dearmor | tee {{ package.signing_dest }};
+    curl -fsSL {{ package.signing_url }} | gpg --dearmor | sudo tee {{ package.signing_dest }}
   loop_control:
     loop_var: package
   loop: "{{ extends.other_packages }}"
