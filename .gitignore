@@ -1,4 +1,7 @@
 .vagrant
+.ansible
+kubespray-venv/
+.kubeconfig
 *.retry
 **/vagrant_ansible_inventory
 *.iml

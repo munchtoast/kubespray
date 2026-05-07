@@ -17,7 +17,7 @@
       ansible.builtin.include_tasks: utils/execute_task.yml
       vars:
         load_task: "subtask/{{ task.name }}"
-        load_vars: "{{ task.vars | map('regex_replace', '^(.*)$', 'subtask_vars/\\1') | list }}"
+        load_vars: "{{ task.vars | default([]) | map('regex_replace', '^(.*)$', 'subtask_vars/\\1') | list }}"
       loop_control:
         loop_var: task
       loop: "{{ playbook_merged_tasks_run_order }}"

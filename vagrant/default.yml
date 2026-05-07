@@ -1,9 +1,16 @@
 ---
 input_tasks_run_order:
-  - name: EXAMPLE_test.yml
+  - name: fetch-kubeconfig.yml
+  - name: install-packages.yml
     vars:
-      - EXAMPLE_test.vars.yml
-  - name: EXAMPLE_echo.yml
+      - ubuntu-packages.vars.yml
+  - name: install-other-packages-apt.yml
     vars:
-      - EXAMPLE_echo.vars.yml
+      - ubuntu-packages.vars.yml
+  - name: install-pip-packages.yml
+    vars:
+      - pip-packages.vars.yml
+  - name: install-helm-charts.yml
+    vars:
+      - helm-charts.vars.yml
 ...
